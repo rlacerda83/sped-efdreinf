@@ -15,13 +15,13 @@ namespace NFePHP\EFDReinf\Common\Soap;
  * @link      http://github.com/nfephp-org/sped-efdreinf for the canonical source repository
  */
 
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use NFePHP\Common\Certificate;
 use NFePHP\EFDReinf\Common\Soap\SoapInterface;
 use NFePHP\Common\Exception\SoapException;
 use NFePHP\Common\Exception\RuntimeException;
 use NFePHP\Common\Strings;
 use League\Flysystem\Filesystem;
-use League\Flysystem\Adapter\Local;
 use Psr\Log\LoggerInterface;
 
 abstract class SoapBase implements SoapInterface
@@ -250,7 +250,7 @@ abstract class SoapBase implements SoapInterface
      */
     protected function setLocalFolder($folder = '')
     {
-        $this->adapter = new Local($folder);
+        $this->adapter = new LocalFilesystemAdapter($folder);
         $this->filesystem = new Filesystem($this->adapter);
     }
 
