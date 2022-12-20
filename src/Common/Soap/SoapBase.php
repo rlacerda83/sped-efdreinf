@@ -15,6 +15,7 @@ namespace NFePHP\EFDReinf\Common\Soap;
  * @link      http://github.com/nfephp-org/sped-efdreinf for the canonical source repository
  */
 
+use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use NFePHP\Common\Certificate;
 use NFePHP\EFDReinf\Common\Soap\SoapInterface;
@@ -387,7 +388,7 @@ abstract class SoapBase implements SoapInterface
         $this->prifile = $this->certsdir. Strings::randomString(10).'.pem';
         $this->pubfile = $this->certsdir . Strings::randomString(10).'.pem';
         $this->certfile = $this->certsdir . Strings::randomString(10).'.pem';
-        $ret = true;
+
         $private = $this->certificate->privateKey;
         if ($this->encriptPrivateKey) {
             //cria uma senha temporária ALEATÓRIA para salvar a chave primaria
@@ -401,19 +402,21 @@ abstract class SoapBase implements SoapInterface
                 $this->temppass
             );
         }
-        $ret &= $this->filesystem->put(
-            $this->prifile,
-            $private
-        );
-        $ret &= $this->filesystem->put(
-            $this->pubfile,
-            $this->certificate->publicKey
-        );
-        $ret &= $this->filesystem->put(
-            $this->certfile,
-            $private."{$this->certificate}"
-        );
-        if (!$ret) {
+
+        try {
+            $this->filesystem->write(
+                $this->prifile,
+                $private
+            );
+            $this->filesystem->write(
+                $this->pubfile,
+                $this->certificate->publicKey
+            );
+            $this->filesystem->write(
+                $this->certfile,
+                $private . "{$this->certificate}"
+            );
+        } catch (FilesystemException $exception) {
             throw new RuntimeException(
                 'Unable to save temporary key files in folder.'
             );
